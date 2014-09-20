@@ -1,6 +1,18 @@
 package com.hgt.leapsign;
 
+import java.io.DataInputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import com.leapmotion.leap.Bone;
 import com.leapmotion.leap.Controller;
@@ -18,7 +30,7 @@ public class LeapListener extends Listener {
 
 	public void onConnect(Controller controller) {
 		System.out.println("Connected");
-		
+
 	}
 
 	public void onFrame(Controller controller) {
@@ -59,7 +71,18 @@ public class LeapListener extends Listener {
 			if (str1 == null && word.length() > 0) {
 				filter = word.toString();
 				System.out.println("filter: " + filter);
-				 
+
+				URL t2v = null;
+
+				try {
+					t2v = new URL(
+							"http://translate.google.com/translate_tts?ie=UTF-8&tl=ja&q"
+									+ URLEncoder.encode(filter));
+
+				} catch (Exception e) {
+				}
+				;
+
 				LeapSign.jtf2.setText(filter);
 				word = new StringBuilder();
 			} else if (str1 == null) {
@@ -73,7 +96,7 @@ public class LeapListener extends Listener {
 
 			}
 			fcount = 0;
-		} else if(str1 != str){
+		} else if (str1 != str) {
 			fcount++;
 		}
 
@@ -81,97 +104,109 @@ public class LeapListener extends Listener {
 
 	public String analyze(ArrayList<Vector> fingerDirs,
 			ArrayList<Vector> fingerLoc) {
-		if (!hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
-				.isExtended()
-				&& !hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE).get(0)
-						.isExtended()
-				&& !hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
-						.isExtended()
-				&& !hand.fingers().fingerType(Finger.Type.TYPE_PINKY).get(0)
-						.isExtended() && hand.palmNormal().getY() < -0.75) {
-			return aTest(fingerDirs, fingerLoc);
-		} else if (hand.palmNormal().getY() < -0.75
-				&& hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
-						.isExtended()
-				&& hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE).get(0)
-						.isExtended()
-				&& hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
-						.isExtended()
-				&& hand.fingers().fingerType(Finger.Type.TYPE_PINKY).get(0)
-						.isExtended()) {
-			return bTest(fingerDirs, fingerLoc);
-		} else if (hand.palmNormal().getY() < -0.75
-				&& !hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
-						.isExtended()
-				&& hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE).get(0)
-						.isExtended()
-				&& hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
-						.isExtended()
-				&& hand.fingers().fingerType(Finger.Type.TYPE_PINKY).get(0)
-						.isExtended()) {
-			return fTest(fingerDirs, fingerLoc);
-		} else if (hand.palmNormal().getX() < -0.75) {
-			return cTest(fingerDirs, fingerLoc);
-		} else if (hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
-				.isExtended()
-				&& !hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE).get(0)
-						.isExtended()
-				&& !hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
-						.isExtended()
-				&& !hand.fingers().fingerType(Finger.Type.TYPE_PINKY).get(0)
-						.isExtended() && hand.palmNormal().getY() < -0.75) {
-			return dTest(fingerDirs, fingerLoc);
-		} else if (hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
-				.isExtended()
-				&& hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE).get(0)
-						.isExtended()
-				&& !hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
-						.isExtended()
-				&& !hand.fingers().fingerType(Finger.Type.TYPE_PINKY).get(0)
-						.isExtended() && hand.palmNormal().getY() < -0.75) {
-			return hTest(fingerDirs, fingerLoc);
-		} else if (hand.fingers().fingerType(Finger.Type.TYPE_THUMB).get(0)
-				.isExtended()
-				&& !hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
-						.isExtended()
-				&& !hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE).get(0)
-						.isExtended()
-				&& !hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
-						.isExtended()
-				&& hand.fingers().fingerType(Finger.Type.TYPE_PINKY).get(0)
-						.isExtended() && hand.palmNormal().getY() < -0.75) {
-			return yTest(fingerDirs, fingerLoc);
-		} else if (!hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
-				.isExtended()
-				&& !hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE).get(0)
-						.isExtended()
-				&& !hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
-						.isExtended()
-				&& hand.fingers().fingerType(Finger.Type.TYPE_PINKY).get(0)
-						.isExtended() && hand.palmNormal().getY() < -0.75) {
-			return iTest(fingerDirs, fingerLoc);
-		} else if (hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
-				.isExtended()
-				&& hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE).get(0)
-						.isExtended()
-				&& hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
-						.isExtended()
-				&& !hand.fingers().fingerType(Finger.Type.TYPE_PINKY).get(0)
-						.isExtended() && hand.palmNormal().getY() < -0.75) {
-			return wTest(fingerDirs, fingerLoc);
+		double fVel = 0.0;
+		for (Finger f : hand.fingers()) {
+			fVel += f.tipVelocity().magnitude();
 		}
-			else if (!hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
+		//System.out.println(fVel + "");
+		if (Math.sqrt(fVel) < 30) {
+			if (!hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
 					.isExtended()
-					&& hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE).get(0)
-							.isExtended()
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE)
+							.get(0).isExtended()
 					&& !hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
 							.isExtended()
-					&& !hand.fingers().fingerType(Finger.Type.TYPE_PINKY).get(0)
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_PINKY)
+							.get(0).isExtended()
+					&& hand.palmNormal().getY() < -0.75) {
+				return aTest(fingerDirs, fingerLoc);
+			} else if (hand.palmNormal().getY() < -0.75
+					&& hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
+							.isExtended()
+					&& hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE)
+							.get(0).isExtended()
+					&& hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
+							.isExtended()
+					&& hand.fingers().fingerType(Finger.Type.TYPE_PINKY).get(0)
+							.isExtended()) {
+				return bTest(fingerDirs, fingerLoc);
+			} else if (hand.palmNormal().getY() < -0.75
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_INDEX)
+							.get(0).isExtended()
+					&& hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE)
+							.get(0).isExtended()
+					&& hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
+							.isExtended()
+					&& hand.fingers().fingerType(Finger.Type.TYPE_PINKY).get(0)
+							.isExtended()) {
+				return fTest(fingerDirs, fingerLoc);
+			} else if (hand.palmNormal().getX() < -0.75) {
+				return cTest(fingerDirs, fingerLoc);
+			} else if (hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
+					.isExtended()
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE)
+							.get(0).isExtended()
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
+							.isExtended()
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_PINKY)
+							.get(0).isExtended()
+					&& hand.palmNormal().getY() < -0.75) {
+				return dTest(fingerDirs, fingerLoc);
+			} else if (hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
+					.isExtended()
+					&& hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE)
+							.get(0).isExtended()
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
+							.isExtended()
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_PINKY)
+							.get(0).isExtended()
+					&& hand.palmNormal().getY() < -0.75) {
+				return hTest(fingerDirs, fingerLoc);
+			} else if (hand.fingers().fingerType(Finger.Type.TYPE_THUMB).get(0)
+					.isExtended()
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_INDEX)
+							.get(0).isExtended()
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE)
+							.get(0).isExtended()
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
+							.isExtended()
+					&& hand.fingers().fingerType(Finger.Type.TYPE_PINKY).get(0)
 							.isExtended() && hand.palmNormal().getY() < -0.75) {
+				return yTest(fingerDirs, fingerLoc);
+			} else if (!hand.fingers().fingerType(Finger.Type.TYPE_INDEX)
+					.get(0).isExtended()
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE)
+							.get(0).isExtended()
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
+							.isExtended()
+					&& hand.fingers().fingerType(Finger.Type.TYPE_PINKY).get(0)
+							.isExtended() && hand.palmNormal().getY() < -0.75) {
+				return iTest(fingerDirs, fingerLoc);
+			} else if (hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
+					.isExtended()
+					&& hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE)
+							.get(0).isExtended()
+					&& hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
+							.isExtended()
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_PINKY)
+							.get(0).isExtended()
+					&& hand.palmNormal().getY() < -0.75) {
+				return wTest(fingerDirs, fingerLoc);
+			} else if (!hand.fingers().fingerType(Finger.Type.TYPE_INDEX)
+					.get(0).isExtended()
+					&& hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE)
+							.get(0).isExtended()
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
+							.isExtended()
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_PINKY)
+							.get(0).isExtended()
+					&& hand.palmNormal().getY() < -0.75) {
 				return "FUCK YOU";
-		} else {
-			return miscTest(fingerDirs, fingerLoc);
+			} else {
+				return miscTest(fingerDirs, fingerLoc);
+			}
 		}
+		return null;
 	}
 
 	private String aTest(ArrayList<Vector> fingerDirs,
