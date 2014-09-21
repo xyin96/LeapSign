@@ -304,7 +304,7 @@ public class LeapListener extends Listener implements SpellCheckListener {
 					&& !hand.fingers().fingerType(Finger.Type.TYPE_PINKY)
 							.get(0).isExtended()
 					&& hand.palmNormal().getY() < -0.75) {
-				return "FUCK YOU";
+//				return "FUCK YOU";
 			} else {
 				return miscTest(fingerDirs, fingerLoc);
 			}
@@ -329,7 +329,7 @@ public class LeapListener extends Listener implements SpellCheckListener {
 	private String miscTest(ArrayList<Vector> fingerDirs,
 			ArrayList<Vector> fingerLoc) {
 		if (Math.abs(hand.palmNormal().getZ() - 1) < 0.1) {
-			if (fingerDirs.get(1).cross(fingerDirs.get(2)).magnitude() > 10) {
+			if (Math.abs(fingerDirs.get(1).yaw() - fingerDirs.get(2).yaw()) > 0.5) {
 				return "P";
 			} else {
 				return "Q";
