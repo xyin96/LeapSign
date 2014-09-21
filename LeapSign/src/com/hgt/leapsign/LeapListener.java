@@ -52,7 +52,7 @@ import com.swabunga.spell.jedit.JazzySpellCheck;
 import javazoom.jlgui.basicplayer.BasicPlayer;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
 
-public class LeapListener extends Listener implements SpellCheckListener{
+public class LeapListener extends Listener implements SpellCheckListener {
 	private final String API_KEY = "AIzaSyDUIHqw1okuAQ-XZCse3yQU3U23FVa90jE";
 	private Hand hand;
 	private String str, filter;
@@ -64,7 +64,6 @@ public class LeapListener extends Listener implements SpellCheckListener{
 
 	public void onConnect(Controller controller) {
 		System.out.println("Connected");
-		
 
 	}
 
@@ -97,7 +96,7 @@ public class LeapListener extends Listener implements SpellCheckListener{
 			// averageDir);
 			// System.out.println(fingerToAverage.type() + "_LOC: " +
 			// averageLoc);
-			fingerDir.add(averageLoc);
+			fingerDir.add(averageDir);
 			fingerLoc.add(averageLoc);
 		}
 
@@ -132,7 +131,9 @@ public class LeapListener extends Listener implements SpellCheckListener{
 								"http://translate.google.com/translate_tts?ie=UTF-8&tl=en&q="
 										+ URLEncoder.encode(filter));
 						URLConnection connection = url.openConnection();
-						connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:25.0) Gecko/20100101 Firefox/25.0");
+						connection
+								.addRequestProperty("User-Agent",
+										"Mozilla/5.0 (Windows NT 6.1; WOW64; rv:25.0) Gecko/20100101 Firefox/25.0");
 						InputStream in = new BufferedInputStream(
 								connection.getInputStream());
 						ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -150,19 +151,17 @@ public class LeapListener extends Listener implements SpellCheckListener{
 								"C:\\Users\\Xiaoyu\\workspace\\LeapSign\\tts.mp3");
 						fos.write(response);
 						fos.close();
-						
+
 						String pathToMp3 = "C:\\Users\\Xiaoyu\\workspace\\LeapSign\\tts.mp3";
 						try {
-							if(player == null){
+							if (player == null) {
 								player = new BasicPlayer();
 							}
-						    player.open(new URL("file:///" + pathToMp3));
-						    player.play();
+							player.open(new URL("file:///" + pathToMp3));
+							player.play();
 						} catch (BasicPlayerException | MalformedURLException e) {
-						    e.printStackTrace();
+							e.printStackTrace();
 						}
-						
-						
 
 					} catch (FileNotFoundException e) {
 						// TODO Auto-generated catch block
@@ -198,8 +197,22 @@ public class LeapListener extends Listener implements SpellCheckListener{
 		for (Finger f : hand.fingers()) {
 			fVel += f.tipVelocity().magnitude();
 		}
+		
+//		System.out.println("Finger Directions:");
+//		for(Vector v: fingerDirs){
+//			System.out.println(v);
+//		}
+//		
+//		System.out.println();
+//		System.out.println("Finger Locations");
+//		for(Vector v: fingerLoc){
+//			System.out.println(v);
+//		}
+//		System.out.println();
+//		System.out.println("---------------------------");
+//		
 		// System.out.println(fVel + "");
-		if (Math.sqrt(fVel) < 30) {
+		if (Math.sqrt(fVel) < 50) {
 			if (!hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
 					.isExtended()
 					&& !hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE)
@@ -295,6 +308,8 @@ public class LeapListener extends Listener implements SpellCheckListener{
 			} else {
 				return miscTest(fingerDirs, fingerLoc);
 			}
+		} else {
+			fcount = 0;
 		}
 		return null;
 	}
@@ -302,11 +317,10 @@ public class LeapListener extends Listener implements SpellCheckListener{
 	private String aTest(ArrayList<Vector> fingerDirs,
 			ArrayList<Vector> fingerLoc) {
 		Vector thumb = fingerDirs.get(0);
-		// System.out.println(thumb);
-		// System.out.println(thumb.cross(fingerDirs.get(1)));
-		if (thumb.getX() < -1.5) {
+
+		if (thumb.yaw() < 0.1) {
 			return "A";
-		} else if (thumb.getX() < 1) {
+		} else if (thumb.yaw() > 0.1) {
 			return "E";
 		}
 		return null;
@@ -330,8 +344,7 @@ public class LeapListener extends Listener implements SpellCheckListener{
 		Vector thumb = fingerDirs.get(0);
 		Vector thumbLoc = fingerLoc.get(0);
 
-		if (fingerLoc.get(1).getX() < thumbLoc.getX()
-				&& thumbLoc.getX() < fingerLoc.get(4).getX()) {
+		if (thumb.yaw() > -0.2) {
 			return "B";
 		}
 		return null;
@@ -339,9 +352,10 @@ public class LeapListener extends Listener implements SpellCheckListener{
 
 	private String cTest(ArrayList<Vector> fingerDirs,
 			ArrayList<Vector> fingerLoc) {
-		if (fingerLoc.get(0).distanceTo(fingerLoc.get(2)) < 15) {
+//		System.out.println(hand.sphereRadius());
+		if (hand.sphereRadius() < 50) {
 			return "O";
-		} else if (fingerLoc.get(0).distanceTo(fingerLoc.get(2)) > 20) {
+		} else if (hand.sphereRadius() > 50) {
 			return "C";
 		}
 		return null;
@@ -350,33 +364,25 @@ public class LeapListener extends Listener implements SpellCheckListener{
 	private String dTest(ArrayList<Vector> fingerDirs,
 			ArrayList<Vector> fingerLoc) {
 		Vector thumb = fingerDirs.get(0);
-		// System.out.println(hand.finger(1).isExtended());
-		// System.out.println(fingerLoc.get(1));
-		// System.out.println(fingerDirs.get(1).getX());
-		if (thumb.cross(fingerDirs.get(1)).magnitude() > 100) {
+
+		if (thumb.yaw() < -0.2) {
 			return "L";
-		} else if (fingerLoc.get(1).getX() < fingerLoc.get(2).getX()) {
+		} else if (thumb.yaw() < 1) {
 			return "D";
-		} else if (fingerLoc.get(1).getX() > fingerLoc.get(2).getX()) {
+		} else {
 			return "G";
 		}
-		return null;
+//		return null;
 	}
 
 	private String fTest(ArrayList<Vector> fingerDirs,
 			ArrayList<Vector> fingerLoc) {
-		Vector thumb = fingerDirs.get(0);
-		// System.out.println(hand.finger(1).isExtended());
-		// System.out.println(thumb.cross(fingerDirs.get(1)));
-
+		
 		return "F";
 	}
 
 	private String yTest(ArrayList<Vector> fingerDirs,
 			ArrayList<Vector> fingerLoc) {
-		Vector thumb = fingerDirs.get(0);
-		// System.out.println(hand.finger(1).isExtended());
-		// System.out.println(thumb.cross(fingerDirs.get(1)));
 
 		return "Y";
 	}
@@ -384,20 +390,14 @@ public class LeapListener extends Listener implements SpellCheckListener{
 	private String hTest(ArrayList<Vector> fingerDirs,
 			ArrayList<Vector> fingerLoc) {
 		// System.out.println(fingerLoc.get(1).distanceTo(fingerLoc.get(2)));
-		if (fingerDirs.get(2).getX() > 1.0
-				&& fingerLoc.get(1).distanceTo(fingerLoc.get(2)) < 5) {
+		if (fingerDirs.get(1).yaw() > 1 && fingerLoc.get(1).distanceTo(fingerLoc.get(2)) < 5) {
 			return "H";
-		} else if (fingerDirs.get(2).getX() > -0.3
+		} else if (fingerDirs.get(1).yaw() < 1 && fingerDirs.get(2).getX() > -0.3
 				&& fingerLoc.get(1).distanceTo(fingerLoc.get(2)) < 5) {
 			return "U";
-		} else if (fingerDirs.get(2).getX() > -0.3
+		} else if (fingerDirs.get(1).yaw() < 1
 				&& fingerLoc.get(1).distanceTo(fingerLoc.get(2)) > 5) {
-			if (hand.fingers().fingerType(Finger.Type.TYPE_THUMB).get(0)
-					.isExtended()) {
-				return "K";
-			} else {
-				return "V";
-			}
+			return "V";
 		}
 		return null;
 	}
@@ -413,9 +413,6 @@ public class LeapListener extends Listener implements SpellCheckListener{
 
 	private String iTest(ArrayList<Vector> fingerDirs,
 			ArrayList<Vector> fingerLoc) {
-		Vector thumb = fingerDirs.get(0);
-		// System.out.println(hand.finger(1).isExtended());
-		// System.out.println(thumb.cross(fingerDirs.get(1)));
 
 		return "I";
 	}
