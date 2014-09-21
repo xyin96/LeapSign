@@ -223,6 +223,16 @@ public class LeapListener extends Listener implements SpellCheckListener {
 							.get(0).isExtended()
 					&& hand.palmNormal().getY() < -0.75) {
 				return aTest(fingerDirs, fingerLoc);
+			} else if (hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
+					.isExtended()
+					&& hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE)
+							.get(0).isExtended()
+					&& hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
+							.isExtended()
+					&& !hand.fingers().fingerType(Finger.Type.TYPE_PINKY)
+							.get(0).isExtended()
+					&& hand.palmNormal().getY() < -0.75) {
+				return wTest(fingerDirs, fingerLoc);
 			} else if (hand.palmNormal().getY() < -0.75
 					&& hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
 							.isExtended()
@@ -285,16 +295,6 @@ public class LeapListener extends Listener implements SpellCheckListener {
 					&& hand.fingers().fingerType(Finger.Type.TYPE_PINKY).get(0)
 							.isExtended() && hand.palmNormal().getY() < -0.75) {
 				return iTest(fingerDirs, fingerLoc);
-			} else if (hand.fingers().fingerType(Finger.Type.TYPE_INDEX).get(0)
-					.isExtended()
-					&& hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE)
-							.get(0).isExtended()
-					&& hand.fingers().fingerType(Finger.Type.TYPE_RING).get(0)
-							.isExtended()
-					&& !hand.fingers().fingerType(Finger.Type.TYPE_PINKY)
-							.get(0).isExtended()
-					&& hand.palmNormal().getY() < -0.75) {
-				return wTest(fingerDirs, fingerLoc);
 			} else if (!hand.fingers().fingerType(Finger.Type.TYPE_INDEX)
 					.get(0).isExtended()
 					&& hand.fingers().fingerType(Finger.Type.TYPE_MIDDLE)
@@ -404,8 +404,9 @@ public class LeapListener extends Listener implements SpellCheckListener {
 
 	private String wTest(ArrayList<Vector> fingerDirs,
 			ArrayList<Vector> fingerLoc) {
-		if (fingerLoc.get(1).distanceTo(fingerLoc.get(2)) > 5
-				&& fingerLoc.get(2).distanceTo(fingerLoc.get(3)) > 5) {
+		//System.out.println(fingerLoc.get(1).distanceTo(fingerLoc.get(2)) + " " + fingerLoc.get(2).distanceTo(fingerLoc.get(3)));
+		if (fingerLoc.get(1).distanceTo(fingerLoc.get(2)) > 3
+				&& fingerLoc.get(2).distanceTo(fingerLoc.get(3)) > 3) {
 			return "W";
 		}
 		return null;
